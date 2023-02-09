@@ -1,17 +1,41 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
+
+/*
+	We have to give the type of parameters.
+	We can give it just one using comma, if the types of multiple parameter are same.
+*/
+func multiply(a, b int) int {
+	return a * b;
+}
+
+/*
+	We can give the type of parameter using '...' when It is array type.
+*/
+func repeatMe(words ...string) {
+	fmt.Println(words);
+}
+
+
+/*
+	Functions in Go can return multiple values.
+*/
+func lenAndUpper(name string) (int, string) {
+	return len(name), strings.ToUpper(name);
+}
 
 func main() {
-	const name string = "hyuk";
+	fmt.Println(multiply(3, 4));
 
 	/*
-		var_name := var_value
-			-> Go will infer the type of variable.
-			-> The type of value cannot be changed after been inferred.
-			-> This grammer cannot be used outside of function block.
+		We can ignore the value of return values with using '_'.
 	*/
-	age := 27; // var age int16 = 27;
+	totalLength, _ := lenAndUpper("hyuk");
+	fmt.Println(totalLength);
 
-	fmt.Printf("I'm %s. and %d years old.\n", name, age);
+	repeatMe("hyuk", "sun", "123", "456");
 }
