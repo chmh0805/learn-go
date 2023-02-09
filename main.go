@@ -28,6 +28,25 @@ func lenAndUpper(name string) (int, string) {
 	return len(name), strings.ToUpper(name);
 }
 
+/*
+	Naked Return
+		-> If we set the name of return values, We can return them just writing "return".
+*/
+func lenAndLower(name string) (length int, lowercase string) {
+	length = len(name);
+	lowercase = strings.ToLower(name);
+	return // length, lowercase
+}
+
+/*
+	defer will be run after return or the function block ends.
+*/
+func deferFunc(name string) (upperName string) {
+	defer fmt.Println("I'm done!"); // It will be run after retrun.
+	upperName = strings.ToUpper(name);
+	return
+}
+
 func main() {
 	fmt.Println(multiply(3, 4));
 
@@ -37,5 +56,10 @@ func main() {
 	totalLength, _ := lenAndUpper("hyuk");
 	fmt.Println(totalLength);
 
+	length, lowercase := lenAndLower("HYUK");
+	fmt.Println(length, lowercase);
+
 	repeatMe("hyuk", "sun", "123", "456");
+
+	deferFunc("sun");
 }
