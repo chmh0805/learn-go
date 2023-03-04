@@ -76,16 +76,14 @@ func canIDrink(age int) bool {
 }
 
 func main() {
-	names := [5]string{"hyuk", "sun", "mun"}; // Array
-	// can make array like this -> [...]string{"a", "b", "c"};
-	names[3] = "aaa";
-	names[4] = "bbb";
-	// names[5] = "asdasd"; // out of bounds.
+	person := map[string]string{
+		"name": "hyuk",
+		"age": "12",
+	};
 
-	ages := []int{18, 19, 20}; // Slice
-	// ages[3] = 21; // cannot add item like this.
-	ages = append(ages, 21); // append doesn't modify origin slice, just return modified slice.
+	fmt.Println(person["name"]);
 
-	fmt.Println(names);
-	fmt.Println(ages);
+	for key, value := range person {
+		fmt.Println(key, ":", value);
+	}
 }
