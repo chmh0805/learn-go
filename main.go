@@ -76,5 +76,9 @@ func canIDrink(age int) bool {
 }
 
 func main() {
-	fmt.Println(canIDrink(16));
+	a := 2;
+	b := &a;
+	*b = 20; // update (value of a)[*b] using (pointer of a[&a])[b].
+
+	fmt.Println(a, b);
 }
