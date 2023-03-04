@@ -47,19 +47,21 @@ func deferFunc(name string) (upperName string) {
 	return
 }
 
-func main() {
-	fmt.Println(multiply(3, 4));
-
+func superAdd(numbers ...int) int {
+	total := 0;
 	/*
-		We can ignore the value of return values with using '_'.
+		range {items} will return {index, item}
 	*/
-	totalLength, _ := lenAndUpper("hyuk");
-	fmt.Println(totalLength);
+	for _, number := range numbers {
+		total += number;
+	}
+	// for i := 0; i < len(numbers); i++ {
+	// 	fmt.Println(numbers[i])
+	// }
+	return total;
+}
 
-	length, lowercase := lenAndLower("HYUK");
-	fmt.Println(length, lowercase);
-
-	repeatMe("hyuk", "sun", "123", "456");
-
-	deferFunc("sun");
+func main() {
+	result := superAdd(1, 2, 3, 4, 5, 6);
+	fmt.Println(result);
 }
