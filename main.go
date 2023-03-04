@@ -61,7 +61,20 @@ func superAdd(numbers ...int) int {
 	return total;
 }
 
+func canIDrink(age int) bool {
+	// if koreanAge := age + 2; koreanAge < 18 { // can make local variable in conditional loop
+	// 	return false;
+	// }
+	switch koreanAge := age + 2; koreanAge { // can also make local variable in switch ...case loop
+	case 10:
+		return false
+	case 18:
+		return true
+	}
+
+	return false;
+}
+
 func main() {
-	result := superAdd(1, 2, 3, 4, 5, 6);
-	fmt.Println(result);
+	fmt.Println(canIDrink(16));
 }
