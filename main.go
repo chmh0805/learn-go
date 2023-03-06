@@ -2,20 +2,18 @@ package main
 
 import (
 	"fmt"
-	"learngo/accounts"
-	"log"
+	"learngo/mydict"
 )
 
 func main() {
-	account := accounts.NewAccount("Hyuk");
-	account.Deposit(100);
-	// fmt.Println(account.Owner(), account.Balance());
-
-	err := account.Withdraw(50);
-	if err != nil {
-		log.Fatalln(err);
+	dictionary := mydict.Dictionary{
+		"first": "First Word",
 	}
 
-	account.ChangeOwner("Sun");
-	fmt.Println(account);
+	definition, err := dictionary.Search("second");
+	if err != nil {
+		fmt.Println(err);
+	} else {
+		fmt.Println(definition);
+	}
 }
