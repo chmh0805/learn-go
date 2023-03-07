@@ -1,34 +1,35 @@
 package main
 
 import (
+	"errors"
 	"fmt"
-	"learngo/mydict"
+	"net/http"
 )
 
+var errRequestFailed = errors.New("request Failed");
+
 func main() {
-	dictionary := mydict.Dictionary{
-		"first": "First Word",
-	}
-	baseWord := "hello";
-	dictionary.Add(baseWord, "First");
-	
-	err := dictionary.Update(baseWord, "Second");
-	if (err != nil) {
-		fmt.Println(err);
-	}
+	urls := []string{
+		"https://www.airbnb.com/",
+		"https://www.google.com/",
+		"https://www.amazon.com/",
+		"https://www.reddit.com/",
+		"https://soundcloud.com/",
+		"https://www.facebook.com/",
+		"https://www.instagram.com/",
+		"https://academy.nomadcoders.co/",
+	};
 
-	word, _ := dictionary.Search(baseWord);
-	fmt.Println(word);
+	for _, url := range urls {
+		hitURL(url);
+	}
+}
 
-	err2 := dictionary.Delete(baseWord);
-	if (err2 != nil) {
-		fmt.Println(err2);
+func hitURL(url string) error {
+	fmt.Println("Checking: ", url);
+	resp, err := http.Get(url);
+	if err != nil || resp.StatusCode >= 400 {
+		return errRequestFailed;
 	}
-	
-	word, err3 := dictionary.Search(baseWord);
-	if err3 != nil {
-		fmt.Println(err3);
-	} else {
-		fmt.Println(word);
-	}
+	return nil;
 }
