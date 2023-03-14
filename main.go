@@ -1,28 +1,55 @@
 package main
 
 import (
+	"errors"
 	"fmt"
-	"time"
+	"net/http"
 )
 
-func main() {
-	channel := make(chan string); // make channel which has bool values
-	people := [2]string{"hyuk", "sun"};
-
-	for _, person := range people {
-		go isSexy(person, channel);
-	}
-	
-	fmt.Println("Waiting for messages");
-	
-	for i := 0; i < len(people); i++ {
-		fmt.Println("Recieved this message: ", <- channel);
-	}
-
-	fmt.Println("end!");
+type requestResult struct {
+	url string;
+	status string;
+	statusCode int;
 }
 
-func isSexy(person string, channel chan string) {
-	time.Sleep(time.Second * 5)
-	channel <- person + " is sexy"; // send value to channel.
+var errRequestFailed = errors.New("Request Failed");
+
+func main() {
+	results := make(map[string]string);
+	c := make(chan requestResult);
+
+	urls := []string {
+		"https://www.airbnb.com/",
+		"https://www.google.com/",
+		"https://www.amazon.com/",
+		"https://soundcloud.com/",
+		"https://www.facebook.com/",
+		"https://www.instagram.com/",
+		"https://academy.nomadcoders.co/",
+	};
+
+	for _, url := range urls {
+		go hitURL(url, c);
+	}
+
+	for i := 0; i < len(urls); i++ {
+		result := <-c;
+		results[result.url] = result.status;
+	}
+
+	for url, status := range results {
+		fmt.Println(url, status);
+	}
+}
+
+/*
+	chan<- : send only
+*/
+func hitURL(url string, c chan<- requestResult) {
+	resp, err := http.Get(url);
+	status := "OK";
+	if err != nil || resp.StatusCode >= 400 {
+		status = "FAILED";
+	}
+	c <- requestResult{url: url, status: status, statusCode: resp.StatusCode}
 }
