@@ -13,7 +13,7 @@ import (
 )
 
 var baseURL string = "https://www.saramin.co.kr";
-var searchURL string = baseURL + "/zf_user/search/recruit?&searchword=python";
+var searchURL string = baseURL + "/zf_user/search/recruit?&searchword=";
 
 type extractJobItem struct {
 	title string;
@@ -28,6 +28,13 @@ type extractJobItem struct {
 }
 
 func main() {
+	var keyword string;
+	fmt.Println("Enter Keyword what you want to search:");
+	fmt.Scanln(&keyword);
+
+	searchURL = searchURL + keyword;
+	fmt.Println("It will return result of ", searchURL, "...");
+
 	var jobs []extractJobItem;
 	mainChan := make(chan []extractJobItem);
 
