@@ -29,10 +29,16 @@ type extractJobItem struct {
 
 func main() {
 	var jobs []extractJobItem;
+	mainChan := make(chan []extractJobItem);
+
 	totalPages := getPageCount();
 	
 	for i := 0; i < totalPages; i++ {
-		extractedJobs := getPage(i);
+		go getPage(i, mainChan);
+	}
+	
+	for i := 0; i < totalPages; i++ {
+		extractedJobs := <- mainChan;
 		jobs = append(jobs, extractedJobs...);
 	}
 
@@ -58,31 +64,40 @@ func writeJobs(jobs []extractJobItem) {
 		"Job Type",
 	};
 
-	wErr := w.Write(headers);
-	checkErr(wErr);
+	writeDataToFile(w, headers);
 
 	for _, job := range jobs {
-		jobStr := []string{
-			job.title,
-			job.postURL,
-			job.companyName,
-			job.companyURL,
-			job.expireDate,
-			job.location,
-			job.careerRequirement,
-			job.eduRequirement,
-			job.jobType,
-		};
-		jwErr := w.Write(jobStr);
-		checkErr(jwErr);
-		// for UTF-8 Encoding
-		utf8bom := []byte{0xEF, 0xBB, 0xBF};
-		file.Write(utf8bom);
+		writeJobDataToFile(file, w, job);
 	}
 }
 
-func getPage(pageNum int) []extractJobItem {
+func writeDataToFile(w *csv.Writer, data []string) {
+	wErr := w.Write(data);
+	checkErr(wErr);
+}
+
+func writeJobDataToFile(file *os.File, w *csv.Writer, job extractJobItem) {
+	jobStr := []string{
+		job.title,
+		job.postURL,
+		job.companyName,
+		job.companyURL,
+		job.expireDate,
+		job.location,
+		job.careerRequirement,
+		job.eduRequirement,
+		job.jobType,
+	};
+	jwErr := w.Write(jobStr);
+	checkErr(jwErr);
+	// for UTF-8 Encoding
+	utf8bom := []byte{0xEF, 0xBB, 0xBF};
+	file.Write(utf8bom);
+}
+
+func getPage(pageNum int, mainChan chan<- []extractJobItem) {
 	var jobItems []extractJobItem;
+	c := make(chan extractJobItem);
 
 	pageURL := searchURL + "&recruitPage=" + strconv.Itoa(pageNum + 1);
 	fmt.Println("RequestURL: ", pageURL);
@@ -99,13 +114,18 @@ func getPage(pageNum int) []extractJobItem {
 	// parse Items
 	foundItems := doc.Find(".item_recruit");
 	foundItems.Each(func(i int, card *goquery.Selection) {
-		var item extractJobItem = extractJob(card);
-		jobItems = append(jobItems, item);
+		go extractJob(card, c);
 	});
-	return jobItems;
+
+	for i := 0; i < foundItems.Length(); i++ {
+		job := <-c;
+		jobItems = append(jobItems, job);
+	}
+
+	mainChan <- jobItems;
 }
 
-func extractJob(card *goquery.Selection) extractJobItem {
+func extractJob(card *goquery.Selection, c chan<- extractJobItem) {
 	postTitle, _ := card.Find("h2.job_tit a").Attr("title");
 	postURL, _ := card.Find("h2.job_tit a").Attr("href");
 	companyName := cleanString(card.Find("strong.corp_name a").Text());
@@ -136,7 +156,7 @@ func extractJob(card *goquery.Selection) extractJobItem {
 		}
 	});
 
-	return extractJobItem{
+	c <- extractJobItem{
 		title: cleanString(postTitle),
 		postURL: baseURL + cleanString(postURL),
 		companyName: companyName,
