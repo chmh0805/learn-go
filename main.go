@@ -1,9 +1,11 @@
 package main
 
 import (
+	"encoding/csv"
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 
@@ -20,8 +22,8 @@ type extractJobItem struct {
 	companyURL string;
 	expireDate string;
 	location string;
-	careerCondition string;
-	eduCondition string;
+	careerRequirement string;
+	eduRequirement string;
 	jobType string;
 }
 
@@ -34,7 +36,49 @@ func main() {
 		jobs = append(jobs, extractedJobs...);
 	}
 
-	fmt.Println(jobs);
+	writeJobs(jobs);
+}
+
+func writeJobs(jobs []extractJobItem) {
+	file, err := os.Create("jobs.csv");
+	checkErr(err);
+
+	w := csv.NewWriter(file);
+	defer w.Flush();
+
+	headers := []string{
+		"Title",
+		"PostURL",
+		"CompanyName",
+		"CompanyURL",
+		"Expire Date",
+		"Location",
+		"Career Requirement",
+		"Education Requirement",
+		"Job Type",
+	};
+
+	wErr := w.Write(headers);
+	checkErr(wErr);
+
+	for _, job := range jobs {
+		jobStr := []string{
+			job.title,
+			job.postURL,
+			job.companyName,
+			job.companyURL,
+			job.expireDate,
+			job.location,
+			job.careerRequirement,
+			job.eduRequirement,
+			job.jobType,
+		};
+		jwErr := w.Write(jobStr);
+		checkErr(jwErr);
+		// for UTF-8 Encoding
+		utf8bom := []byte{0xEF, 0xBB, 0xBF};
+		file.Write(utf8bom);
+	}
 }
 
 func getPage(pageNum int) []extractJobItem {
@@ -69,8 +113,8 @@ func extractJob(card *goquery.Selection) extractJobItem {
 	jobDate := cleanString(card.Find("div.job_date span.date").Text());
 
 	var jobLoc string;
-	var careerCond string;
-	var eduCond string;
+	var careerReq string;
+	var eduReq string;
 	var jobType string;
 
 	card.Find("div.job_condition span").Each(func(i int, s *goquery.Selection) {
@@ -79,10 +123,10 @@ func extractJob(card *goquery.Selection) extractJobItem {
 			jobLoc = cleanString(s.Text());
 			break;
 		case 1:
-			careerCond = cleanString(s.Text());
+			careerReq = cleanString(s.Text());
 			break;
 		case 2:
-			eduCond = cleanString(s.Text());
+			eduReq = cleanString(s.Text());
 			break;
 		case 3:
 			jobType = cleanString(s.Text());
@@ -99,8 +143,8 @@ func extractJob(card *goquery.Selection) extractJobItem {
 		companyURL: baseURL + cleanString(companyURL),
 		expireDate: jobDate,
 		location: jobLoc,
-		careerCondition: careerCond,
-		eduCondition: eduCond,
+		careerRequirement: careerReq,
+		eduRequirement: eduReq,
 		jobType: jobType,
 	};
 }
