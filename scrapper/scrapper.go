@@ -24,11 +24,13 @@ type extractJobItem struct {
 	jobType string;
 }
 
+// ResultFileName what will be written result of scrape.
+const ResultFileName string = "jobs.csv";
+const baseURL string = "https://www.saramin.co.kr";
+var searchURL string = baseURL + "/zf_user/search/recruit?&searchword=";
+
 // Scrape Saramin using a keyword
 func Scrape(keyword string) {
-	var baseURL string = "https://www.saramin.co.kr";
-	var searchURL string = baseURL + "/zf_user/search/recruit?&searchword=";
-
 	fmt.Println("Enter Keyword what you want to search:");
 	fmt.Scanln(&keyword);
 
@@ -38,10 +40,10 @@ func Scrape(keyword string) {
 	var jobs []extractJobItem;
 	mainChan := make(chan []extractJobItem);
 
-	totalPages := getPageCount(searchURL);
+	totalPages := getPageCount();
 	
 	for i := 0; i < totalPages; i++ {
-		go getPage(i, mainChan, baseURL, searchURL);
+		go getPage(i, mainChan);
 	}
 	
 	for i := 0; i < totalPages; i++ {
@@ -102,7 +104,7 @@ func writeJobDataToFile(file *os.File, w *csv.Writer, job extractJobItem) {
 	file.Write(utf8bom);
 }
 
-func getPage(pageNum int, mainChan chan<- []extractJobItem, baseURL string, searchURL string) {
+func getPage(pageNum int, mainChan chan<- []extractJobItem) {
 	var jobItems []extractJobItem;
 	c := make(chan extractJobItem);
 
@@ -121,7 +123,7 @@ func getPage(pageNum int, mainChan chan<- []extractJobItem, baseURL string, sear
 	// parse Items
 	foundItems := doc.Find(".item_recruit");
 	foundItems.Each(func(i int, card *goquery.Selection) {
-		go extractJob(card, c, baseURL);
+		go extractJob(card, c);
 	});
 
 	for i := 0; i < foundItems.Length(); i++ {
@@ -132,7 +134,7 @@ func getPage(pageNum int, mainChan chan<- []extractJobItem, baseURL string, sear
 	mainChan <- jobItems;
 }
 
-func extractJob(card *goquery.Selection, c chan<- extractJobItem, baseURL string) {
+func extractJob(card *goquery.Selection, c chan<- extractJobItem) {
 	postTitle, _ := card.Find("h2.job_tit a").Attr("title");
 	postURL, _ := card.Find("h2.job_tit a").Attr("href");
 	companyName := CleanString(card.Find("strong.corp_name a").Text());
@@ -181,7 +183,7 @@ func CleanString(str string) string {
 	return strings.Join(strings.Fields(strings.TrimSpace(str)), " ");
 }
 
-func getPageCount(searchURL string) int {
+func getPageCount() int {
 	pageCount := 0;
 
 	req, reqErr := http.NewRequest("GET", searchURL, nil);

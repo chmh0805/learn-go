@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"learngo/scrapper"
+	"os"
 	"strings"
 
 	"github.com/labstack/echo"
@@ -23,7 +24,10 @@ func handleHome(c echo.Context) error {
 func handleScrape(c echo.Context) error {
 	keyword := strings.ToLower(scrapper.CleanString(c.FormValue("keyword")));
 	fmt.Println(keyword);
-	return nil;
+	
+	defer os.Remove(scrapper.ResultFileName);
+
+	return c.Attachment(scrapper.ResultFileName, fmt.Sprintf("jobs_result_%s.csv", keyword));
 }
 
 func addListener(e *echo.Echo) {
