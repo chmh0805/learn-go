@@ -135,9 +135,9 @@ func getPage(pageNum int, mainChan chan<- []extractJobItem, baseURL string, sear
 func extractJob(card *goquery.Selection, c chan<- extractJobItem, baseURL string) {
 	postTitle, _ := card.Find("h2.job_tit a").Attr("title");
 	postURL, _ := card.Find("h2.job_tit a").Attr("href");
-	companyName := cleanString(card.Find("strong.corp_name a").Text());
+	companyName := CleanString(card.Find("strong.corp_name a").Text());
 	companyURL, _ := card.Find("strong.corp_name a").Attr("href");
-	jobDate := cleanString(card.Find("div.job_date span.date").Text());
+	jobDate := CleanString(card.Find("div.job_date span.date").Text());
 
 	var jobLoc string;
 	var careerReq string;
@@ -147,16 +147,16 @@ func extractJob(card *goquery.Selection, c chan<- extractJobItem, baseURL string
 	card.Find("div.job_condition span").Each(func(i int, s *goquery.Selection) {
 		switch i {
 		case 0:
-			jobLoc = cleanString(s.Text());
+			jobLoc = CleanString(s.Text());
 			break;
 		case 1:
-			careerReq = cleanString(s.Text());
+			careerReq = CleanString(s.Text());
 			break;
 		case 2:
-			eduReq = cleanString(s.Text());
+			eduReq = CleanString(s.Text());
 			break;
 		case 3:
-			jobType = cleanString(s.Text());
+			jobType = CleanString(s.Text());
 			break;
 		default:
 			break;
@@ -164,10 +164,10 @@ func extractJob(card *goquery.Selection, c chan<- extractJobItem, baseURL string
 	});
 
 	c <- extractJobItem{
-		title: cleanString(postTitle),
-		postURL: baseURL + cleanString(postURL),
+		title: CleanString(postTitle),
+		postURL: baseURL + CleanString(postURL),
 		companyName: companyName,
-		companyURL: baseURL + cleanString(companyURL),
+		companyURL: baseURL + CleanString(companyURL),
 		expireDate: jobDate,
 		location: jobLoc,
 		careerRequirement: careerReq,
@@ -176,7 +176,8 @@ func extractJob(card *goquery.Selection, c chan<- extractJobItem, baseURL string
 	};
 }
 
-func cleanString(str string) string {
+// CleanString cleans a string, like trim()
+func CleanString(str string) string {
 	return strings.Join(strings.Fields(strings.TrimSpace(str)), " ");
 }
 
